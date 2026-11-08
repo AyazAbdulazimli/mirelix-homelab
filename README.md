@@ -195,6 +195,14 @@ npm run test:provider -- http://localhost:3030 firefox
 
 CI runs the unit/integration suite and builds and smoke-tests the Docker stack. Live external-provider tests are not CI requirements.
 
+## AI-Assisted Development
+
+Mirelix Homelab is an AI-assisted, vibe-coded open-source project.
+
+AI coding tools have played a significant role in its development, from implementation to debugging and iteration. The project is guided by a human vision, with a focus on practical functionality, self-hosting, and continuous improvement.
+
+AI-assisted development is embraced openly and transparently. Contributions, bug reports, and code reviews are welcome.
+
 ## Contributing and license
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled dependencies.
