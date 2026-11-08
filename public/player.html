@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="az">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Birgə video pleyeri</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}#yt-player{display:block;width:100%;height:100%;border:0}#ytFullscreen{position:fixed;right:8px;bottom:8px;z-index:5;border:1px solid #ffffff40;background:#15151dcc;color:#fff;border-radius:8px;width:40px;height:36px;font:22px system-ui;cursor:pointer}</style>
+<script src="/media-bridge.js"></script><script src="/js/translations.js"></script>
+<script src="/js/i18n.js"></script>
+</head>
+<body><iframe id="yt-player" title="YouTube video pleyeri" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+<button id="ytFullscreen" type="button" aria-label="Tam ekran" title="Tam ekran">⛶</button>
+<script>
+document.getElementById('ytFullscreen').addEventListener('click',()=>{
+  if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});
+  else document.getElementById('yt-player').requestFullscreen?.().catch(()=>{});
+});
+const params = new URLSearchParams(location.search);
+const id = params.get('video');
+if (/^[\w-]{11}$/.test(id || '')) {
+  const src = new URL('https://www.youtube-nocookie.com/embed/' + id);
+  src.search = new URLSearchParams({ enablejsapi: '1', origin: location.origin, playsinline: '1', autoplay: '1', fs: '0', start: String(Math.max(0, Number(params.get('start')) || 0)) });
+  document.getElementById('yt-player').src = src.href;
+  window.onYouTubeIframeAPIReady = () => {
+    new YT.Player('yt-player', { events: {
+      onReady(event) { window.kosmiYouTube = event.target; window.kosmiMediaReady(); },
+      onStateChange(event) {
+        if (![0,1,2].includes(event.data)) return;
+        if (!window.kosmiFirstState) { window.kosmiFirstState = true; window.kosmiMediaChanged('initial'); return; }
+        if (event.data === 1) window.kosmiMediaChanged('play');
+        if (event.data === 2 || event.data === 0) window.kosmiMediaChanged('pause');
+      },
+      onPlaybackRateChange() { window.kosmiMediaChanged('ratechange'); },
+      onAutoplayBlocked() { parent.postMessage({channel:'kosmi-sync', type:'autoplay-blocked', path:[]}, '*'); }
+    }});
+  };
+  const api = document.createElement('script'); api.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(api);
+}
+</script></body></html>

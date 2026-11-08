@@ -1,0 +1,7 @@
+{$APP_DOMAIN} {
+    reverse_proxy mirelix:3030
+}
+
+{$PROXY_DOMAIN} {
+    reverse_proxy mirelix:3031
+}

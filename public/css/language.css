@@ -1,0 +1,14 @@
+.language-picker { display: inline-flex; align-items: center; flex-shrink: 0; gap: 6px; }
+.language-picker select { color: #eee; background: #24262d; border: 1px solid #535361; border-radius: 9px; min-height: 38px; max-width: 150px; padding: 6px 9px; font: 500 12px 'Plus Jakarta Sans', system-ui, sans-serif; cursor: pointer; }
+.language-picker select:focus-visible { outline: 2px solid #b197f5; outline-offset: 2px; }
+.lobby-header { flex-wrap: wrap; gap: 12px; }
+.lobby-header .language-picker { margin-left: auto; }
+@media (max-width: 850px) {
+  .room-header .language-picker { gap: 0; }
+  .room-header .language-picker select { width: 112px; min-height: 36px; padding: 4px; font-size: 11px; }
+  .room-header .header-right { gap: 4px; }
+}
+@media (max-width: 380px) {
+  .room-header .language-picker select { width: 82px; }
+  .room-header .room-badge { max-width: 86px; }
+}

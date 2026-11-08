@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Mirelix Otaq</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/language.css">
+  <link rel="stylesheet" href="/css/room-layout.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Socket.io client -->
+  <script src="/socket.io/socket.io.js"></script>
+<script src="/js/translations.js"></script>
+<script src="/js/i18n.js"></script>
+</head>
+<body class="room-body">
+
+  <!-- Top App Navigation Bar -->
+  <header class="room-header">
+    <div class="header-left">
+      <a href="/" class="room-logo" title="Ana səhifəyə qayıt">
+        <span class="logo-icon">🪐</span>
+        <span class="logo-name">Mire<span>lix</span></span>
+      </a>
+      <div class="room-badge">
+        <span class="room-id-label">OTAQ:</span>
+        <span id="displayRoomId" class="room-id-value">---</span>
+        <button id="btnCopyInvite" class="btn-icon-mini" title="Dəvət linkini kopyala">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span class="copy-text">Kopyala</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center View Switcher Tabs (room stage switcher) -->
+    <nav class="stage-tabs-scroll">
+      <div class="stage-tabs">
+        <button class="stage-tab active" data-view="browser">
+          <span class="tab-icon">🌐</span>
+          <span class="tab-text">Brauzer</span>
+        </button>
+        <button class="stage-tab" data-view="screen">
+          <span class="tab-icon">🖥️</span>
+          <span class="tab-text">Ekran</span>
+          <span id="screenLiveBadge" class="live-pill" style="display:none;">CANLI</span>
+        </button>
+        <button class="stage-tab" data-view="video">
+          <span class="tab-icon">📹</span>
+          <span class="tab-text">Video</span>
+        </button>
+        <button class="stage-tab" data-view="whiteboard">
+          <span class="tab-icon">🎨</span>
+          <span class="tab-text">Lövhə</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Header Right Controls -->
+    <div class="header-right">
+      <label class="language-picker"><select data-language-select aria-label="Dil"><option value="az">Azərbaycan dili</option><option value="en">English</option><option value="tr">Türkçe</option></select></label>
+      <div class="user-pill">
+        <span class="status-dot"></span>
+        <span id="myUsernameDisplay">Mən</span>
+      </div>
+      <button id="btnToggleSidebar" class="btn-sidebar-toggle" title="Çatı aç / bağla">
+        <span class="sidebar-icon">💬</span>
+        <span id="unreadBadge" class="unread-badge" style="display:none;">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="runtimeNotice" class="runtime-notice" role="alert" hidden>Bu portda köhnə server işləyir. <a href="http://localhost:3040">Yenilənmiş otağı aç →</a></div>
+  <div id="secureContextNotice" class="secure-context-notice" role="alert" hidden>Bu HTTP ünvanında bəzi pleyerlərin açarı, kamera və mikrofon işləmir. Otağı HTTPS ünvanı ilə açın.</div>
+
+  <!-- Main Room Layout -->
+  <div class="room-workspace">
+
+    <!-- Central Virtual Stage -->
+    <main class="room-stage" id="stageArea">
+      <button type="button" id="btnExitRoomFullscreen" class="room-fullscreen-exit" hidden aria-label="Tam ekrandan çıx">↙ Geri</button>
+
+      <!-- 1. BROWSER VIEW (Co-browsing arbitrary website & search) -->
+      <section id="viewBrowser" class="stage-view active">
+        <!-- Browser Navigation Bar -->
+        <div class="browser-toolbar">
+          <div class="browser-nav-buttons">
+            <button id="btnBrowserBack" class="browser-btn" title="Geri">‹</button>
+            <button id="btnBrowserForward" class="browser-btn" title="İrəli">›</button>
+            <button id="btnBrowserReload" class="browser-btn" title="Yenilə">↻</button>
+          </div>
+
+          <form id="browserAddressForm" class="browser-address-form">
+            <div class="address-input-wrapper">
+              <span class="address-prefix">🌐</span>
+              <input type="text" id="browserUrlInput" aria-label="Sayt ünvanı və ya axtarış" placeholder="Domen və ya video linki yazın…" inputmode="url" enterkeyhint="go" autocapitalize="none" autocomplete="off" spellcheck="false">
+              <button type="submit" id="btnBrowserGo" class="btn-go" title="Saytı Aç">
+                Aç ➔
+              </button>
+            </div>
+          </form>
+
+          <div class="browser-toolbar-actions">
+            <!-- Open Browser Directory Modal -->
+            <button id="btnOpenBrowserHub" class="btn-tool" title="Tövsiyə olunan sayt kataloqu">
+              <span>📚 Saytlar</span>
+            </button>
+
+            <span class="auto-sync-status" title="Keçidlər və video idarəsi avtomatik paylaşılır">● Avtomatik sinxron</span>
+
+            <!-- Fullscreen / External tab -->
+            <button id="btnExpandBrowser" class="browser-btn" title="Brauzeri tam ekran et">⛶</button>
+            <button id="btnOpenExternal" class="browser-btn" title="Saytı ayrıca tabda aç">↗</button>
+          </div>
+        </div>
+
+        <!-- Quick Bookmark Chips (Only YouTube and Anikoto) -->
+        <div class="browser-quick-links">
+          <span class="quick-title">⚡ Sürətli Keçid:</span>
+          <button class="chip chip-youtube" data-url="youtube.com" style="color: #ff4757; font-weight: 700;">▶️ YouTube</button>
+          <button class="chip chip-anime" data-url="anikototv.com/home/" style="color: #00cec9; font-weight: 700;">🍿 Anikoto Anime</button>
+        </div>
+
+        <!-- Co-Browsing Iframe Container -->
+        <div class="browser-frame-container" id="browserFrameContainer">
+          <button id="btnResumeSyncedMedia" class="resume-synced-media" hidden>▶ İzləməyə qoşul</button>
+          <div id="browserError" class="browser-error" role="alert" hidden>
+            <div class="browser-error-card">
+              <h2 id="browserErrorTitle">Sayt açıla bilmədi</h2>
+              <p id="browserErrorDetail"></p>
+              <p>Ayrıca tabda film oynayırsa, həmin tabı paylaşaraq otaqda birlikdə baxa bilərsiniz. Ekran paylaşımında idarəetmə paylaşan şəxsdə olur.</p>
+              <div class="browser-error-actions">
+                <button id="btnBrowserExternalFallback" type="button">↗ Saytı ayrıca aç</button>
+                <button id="btnBrowserShareFallback" type="button">🖥️ Filmin tabını paylaş</button>
+                <button id="btnBrowserRetry" type="button">↻ Yenidən yoxla</button>
+              </div>
+            </div>
+          </div>
+          <div id="browserLoader" class="browser-loader" style="display:none;">
+            <div class="spinner"></div>
+            <span>Sayt yüklənir...</span>
+          </div>
+          <iframe id="browserIframe" title="Birgə veb baxış" src="/youtube.html" sandbox="allow-scripts allow-forms allow-presentation allow-same-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen 'none'"></iframe>
+        </div>
+        <div class="browser-status" role="status"><span id="browserStatus">Domen və ya video linki daxil edin.</span><button id="btnBrowserHelp" type="button" aria-controls="browserHelp" aria-expanded="false">Açılmır?</button></div>
+        <div id="browserHelp" class="browser-help" hidden>
+          <p>Hər iştirakçı videonu öz brauzerində oynadır. Keçidlər, sürüşdürmə, başlatma/dayandırma, vaxt, sürət və səs avtomatik paylaşılır; əlavə quraşdırmaq lazım deyil. Birbaşa MP4, WebM, M3U8 və audio linkləri də aça bilərsiniz. Pleyer açılmırsa, səhifəni yeniləyin və ya saytı ↗ ilə ayrıca açın. Hesab, CAPTCHA və DRM tələb edən saytlar burada işləməyə bilər. Kompüterdən ekran paylaşımı da edə bilərsiniz.</p>
+        </div>
+      </section>
+
+      <!-- 2. SCREEN SHARING VIEW (WebRTC Fullscreen Stream) -->
+      <section id="viewScreen" class="stage-view">
+        <div class="screen-stage-container">
+          <div id="screenSourcePicker" class="screen-source-picker" hidden><label>Paylaşılan ekran <select id="screenSourceSelect" aria-label="Paylaşılan ekran"></select></label></div>
+          <div id="screenEmptyState" class="screen-empty-state">
+            <div class="empty-icon">🖥️</div>
+            <h2>Canlı Ekran Paylaşımı (HD)</h2>
+            <p>Hələ heç kim ekranını paylaşmır. İstənilən brauzer tabını, filmi, tətbiqi və ya bütün masaüstünü səsli olaraq 60 FPS keyfiyyətlə paylaşa bilərsiniz.</p>
+
+            <div class="screen-features-list">
+              <div class="s-feat"><span>🔊</span> Səsli ötürmə dəstəyi (YouTube / Oyunlar)</div>
+              <div class="s-feat"><span>🚀</span> WebRTC birbaşa P2P bağlantı</div>
+              <div class="s-feat"><span>📱</span> Mobildən yüksək keyfiyyətdə tam ekran izləmə</div>
+            </div>
+
+            <button id="btnStartScreenEmpty" class="btn btn-primary btn-large">
+              <span>🚀 Ekranını Paylaşmağa Başla</span>
+            </button>
+            <p class="screen-hint-text">💡 Qeyd: Kompüterdə açdıqda Chrome/Edge-də "Share tab audio" seçərək səsi də ötürə bilərsiniz.</p>
+          </div>
+
+          <!-- Video element for screen display -->
+          <div id="screenVideoWrapper" class="screen-video-wrapper" style="display:none;">
+            <video id="screenShareVideo" autoplay playsinline></video>
+
+            <!-- Floating overlay controls for screen share -->
+            <div class="screen-overlay-controls">
+              <div class="screen-owner-badge">
+                <span class="live-dot"></span>
+                <span id="screenOwnerLabel">Ekran: Kiminsə</span>
+                <span class="hd-badge">60 FPS HD</span>
+              </div>
+              <div class="screen-actions">
+                <button id="btnScreenPip" class="btn-screen-control" title="Pəncərə içində pəncərə (PiP)">⧉ PiP</button>
+                <button id="btnFullscreenScreen" class="btn-screen-control" title="Tam Ekran">⛶ Tam Ekran</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. VIDEO CALL VIEW (Camera Grid) -->
+      <section id="viewVideo" class="stage-view">
+        <div class="video-grid" id="videoGrid">
+          <!-- Local User Card -->
+          <div class="video-card local-card" id="localVideoCard">
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div class="video-placeholder" id="localVideoPlaceholder">
+              <span class="user-avatar-large">👤</span>
+              <span class="status-text">Kamera Sönülüdür</span>
+            </div>
+            <div class="video-label">
+              <span id="localUserCardName">Mən</span>
+              <span class="mic-status-indicator" id="localMicIndicator">🎙️</span>
+            </div>
+          </div>
+
+          <div id="remoteVideoEmpty" class="video-card remote-empty"><span class="status-text">Digər iştirakçı gözlənilir...</span></div>
+        </div>
+      </section>
+
+      <!-- 4. COLLABORATIVE WHITEBOARD VIEW -->
+      <section id="viewWhiteboard" class="stage-view">
+        <div class="whiteboard-toolbar">
+          <div class="wb-tools">
+            <label>Rəng: <input type="color" id="wbColor" value="#ff4757"></label>
+            <label>Qalınlıq: <input type="range" id="wbSize" min="2" max="25" value="4"></label>
+            <button id="wbClear" class="btn btn-secondary btn-small">Təmizlə</button>
+          </div>
+          <span class="wb-hint">💡 Hər iki tərəf eyni vaxtda çəkə bilər!</span>
+        </div>
+        <div class="whiteboard-canvas-wrapper">
+          <canvas id="whiteboardCanvas"></canvas>
+        </div>
+      </section>
+
+      <!-- FLOATING PICTURE-IN-PICTURE WEBCAM BUBBLE -->
+      <div id="floatingCameraPip" class="floating-pip" title="Sürükləyə bilərsiniz" style="display:none;">
+        <video id="pipRemoteVideo" autoplay playsinline muted></video>
+        <div class="pip-label" id="pipLabel">Dost</div>
+        <button id="btnHidePip" class="pip-close" title="Bağla">×</button>
+      </div>
+
+    </main>
+
+    <!-- Right Sidebar (Real-time Chat & Room Members) -->
+    <aside class="room-sidebar" id="roomSidebar" aria-label="Otaq söhbəti">
+      <!-- Sidebar Top Header with Close Button -->
+      <div class="sidebar-top-bar">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" data-tab="chat">💬 Söhbət</button>
+          <button class="sidebar-tab" data-tab="users">👥 Otaqdakılar (<span id="userCount">1</span>)</button>
+        </div>
+        <!-- Close Chat Button -->
+        <button id="btnCloseSidebar" class="btn-sidebar-close" title="Çatı Bağla">✕</button>
+      </div>
+
+      <!-- Chat Pane -->
+      <div class="sidebar-content active" id="paneChat">
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="Mesajlar">
+          <div class="chat-welcome" id="chatWelcome">
+            <span class="chat-welcome-icon" aria-hidden="true">✦</span>
+            <h2>Birlikdə daha maraqlıdır</h2>
+            <p>Dostunu dəvət et, eyni anda baxın və söhbət edin.</p>
+            <button type="button" class="btn btn-primary" id="btnCopyInviteChat">Dostunu dəvət et ↗</button>
+          </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator" style="display:none;">
+          <span class="dots"></span> <span id="typingName">kimsə</span> yazır...
+        </div>
+
+        <div class="chat-input-area">
+          <div class="quick-emojis">
+            <button class="emoji-btn" type="button">👍</button>
+            <button class="emoji-btn" type="button">🔥</button>
+            <button class="emoji-btn" type="button">😂</button>
+            <button class="emoji-btn" type="button">❤️</button>
+            <button class="emoji-btn" type="button">🚀</button>
+          </div>
+          <form id="chatForm" class="chat-form">
+            <input type="text" id="chatInput" aria-label="Mesaj" placeholder="Mesaj yaz…" autocomplete="off" enterkeyhint="send">
+            <button type="submit" id="btnSendChat" class="btn-send" title="Göndər">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Users Pane -->
+      <div class="sidebar-content" id="paneUsers">
+        <div class="users-list" id="usersList">
+          <!-- Filled dynamically by JS -->
+        </div>
+        <div class="invite-box-mini">
+          <h4>Dostunu Otağa Çağır</h4>
+          <p>Aşağıdakı linki kopyalayıb WhatsApp, Telegram və ya istənilən yerdən göndərin:</p>
+          <div class="invite-link-field">
+            <input type="text" id="inviteUrlField" readonly>
+            <button id="btnCopyInviteSidebar" class="btn btn-secondary btn-small">Kopyala</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Bottom Control Dock (Microphone, Camera, Screen share, Chat, Leave) -->
+  <footer class="room-dock">
+    <div class="dock-left">
+      <span class="connection-status" id="connectionStatus">
+        <span class="pulse-green"></span>
+        <span class="status-txt">Qoşuldu</span>
+      </span>
+    </div>
+
+    <div class="dock-center">
+      <button id="btnToggleMic" class="dock-btn active" title="Mikrofonu Aç/Bağla">
+        <span class="dock-icon">🎙️</span>
+        <span class="dock-label">Mikrofon</span>
+      </button>
+
+      <button id="btnToggleCam" class="dock-btn" title="Kameranı Aç/Bağla">
+        <span class="dock-icon">📹</span>
+        <span class="dock-label">Kamera</span>
+      </button>
+
+      <button id="btnToggleScreen" class="dock-btn dock-btn-highlight" title="Ekran Paylaşımı">
+        <span class="dock-icon">🖥️</span>
+        <span class="dock-label">Paylaş</span>
+      </button>
+
+      <button id="btnQuickBrowser" class="dock-btn" title="Veb Brauzeri Göstər">
+        <span class="dock-icon">🌐</span>
+        <span class="dock-label">Brauzer</span>
+      </button>
+
+      <!-- Dedicated Dock Chat Toggle Button -->
+      <button id="btnDockChat" class="dock-btn" title="Çatı Aç / Bağla">
+        <span class="dock-icon">💬</span>
+        <span class="dock-label">Çat</span>
+        <span id="dockUnreadBadge" class="unread-badge" style="display:none;">0</span>
+      </button>
+
+      <button id="btnLeaveRoom" class="dock-btn dock-btn-danger" title="Otaqdan Çıx">
+        <span class="dock-icon">🚪</span>
+        <span class="dock-label">Çıxış</span>
+      </button>
+    </div>
+
+    <div class="dock-right">
+      <button id="btnDockFullscreen" class="dock-btn-icon" title="Tam Ekran">⛶</button>
+    </div>
+  </footer>
+
+  <!-- BROWSER HUB MODAL (Categorized Website Directory) -->
+  <div id="browserHubModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Saytlar kataloqu" style="display:none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">🌐</span>
+          <h3>Saytlar və filmlər</h3>
+        </div>
+        <button id="btnCloseBrowserHub" class="modal-close" title="Bağla">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">Birlikdə video və ya anime izləmək üçün aşağıdakı platformalardan birini seçin:</p>
+
+        <!-- Categories Grid: Only YouTube & Anikoto -->
+        <div class="hub-category-section">
+          <div class="hub-tiles-grid">
+            <div class="hub-tile" data-url="youtube.com">
+              <span class="hub-icon">▶️</span>
+              <div class="hub-info">
+                <strong>YouTube Sinema</strong>
+                <span>Musiqi, videolar və canlı yayımlar</span>
+              </div>
+            </div>
+            <div class="hub-tile" data-url="anikototv.com/home/">
+              <span class="hub-icon">🍿</span>
+              <div class="hub-info">
+                <strong>Anikoto Anime</strong>
+                <span>Pulsuz HD Anime izləmə platforması</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+  <button id="btnEnableCallAudio" class="call-audio-unlock" type="button" hidden>🔊 Söhbətin səsini aç</button>
+
+  <!-- Scripts -->
+  <script src="/js/audio.js"></script>
+  <script src="/js/webrtc.js"></script>
+  <script src="/js/fullscreen.js"></script>
+  <script src="/js/browser.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

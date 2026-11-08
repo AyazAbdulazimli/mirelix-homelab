@@ -1,0 +1,52 @@
+name: mirelix-homelab
+services:
+  mirelix:
+    build: .
+    image: mirelix-homelab:local
+    restart: unless-stopped
+    init: true
+    environment:
+      PORT: "3030"
+      PROXY_PORT: "3031"
+      PROXY_PUBLIC_PORT: ${PROXY_PORT:-3031}
+      PROXY_ORIGIN: ${PROXY_ORIGIN:-}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
+      ICE_SERVERS: '${ICE_SERVERS:-[{"urls":"stun:stun.l.google.com:19302"}]}'
+      TZ: ${TZ:-Asia/Baku}
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${APP_PORT:-3030}:3030"
+      - "${BIND_ADDRESS:-0.0.0.0}:${PROXY_PORT:-3031}:3031"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-mirelix.example.com}
+      PROXY_DOMAIN: ${PROXY_DOMAIN:-mirelix-proxy.example.net}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      mirelix:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

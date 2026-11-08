@@ -1,0 +1,46 @@
+{
+  "name": "mirelix-homelab",
+  "version": "1.0.0",
+  "description": "Self-hosted Mirelix rooms, synchronized browsing, chat and WebRTC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "test:playback": "node scripts/check-playback.cjs",
+    "test:sync": "node scripts/check-sync.cjs",
+    "test:browser-sync": "node scripts/check-browser-sync.cjs",
+    "test:blocked-site": "node scripts/check-blocked-site.cjs",
+    "test:native-media": "node scripts/check-native-media.cjs",
+    "test:browser-containment": "node scripts/check-browser-containment.cjs",
+    "test:room-layout": "node scripts/check-room-layout.cjs",
+    "test:room-fullscreen": "node scripts/check-room-fullscreen.cjs",
+    "build:vendor": "node scripts/build-vendor.cjs",
+    "test:homelab": "node scripts/check-homelab.cjs",
+    "test:multiparty": "node scripts/check-multiparty.cjs",
+    "test:provider": "node scripts/check-provider-sync.cjs",
+    "test:languages": "node scripts/check-languages.cjs"
+  },
+  "keywords": [
+    "homelab",
+    "self-hosted",
+    "docker",
+    "webrtc",
+    "watch-party",
+    "screen-sharing"
+  ],
+  "type": "commonjs",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "express": "^5.3.0",
+    "hls.js": "^1.7.4",
+    "ipaddr.js": "^2.5.0",
+    "socket.io": "^4.8.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  },
+  "license": "MIT"
+}

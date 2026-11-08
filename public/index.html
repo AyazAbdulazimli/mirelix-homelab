@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirelix - Birlikdə İzlə, Vebdə Gəz, Canlı Ekran Paylaş və Danış</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/language.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="/js/translations.js"></script>
+<script src="/js/i18n.js"></script>
+</head>
+<body class="lobby-body">
+  <div class="lobby-background">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+  </div>
+
+  <div class="lobby-container">
+    <header class="lobby-header">
+      <div class="logo">
+        <span class="logo-icon">🪐</span>
+        <span class="logo-text">Mire<span>lix</span></span>
+      </div>
+      <label class="language-picker"><select data-language-select aria-label="Dil"><option value="az">Azərbaycan dili</option><option value="en">English</option><option value="tr">Türkçe</option></select></label>
+      <div class="badge-free">100% PULSUZ & TƏMİZ</div>
+    </header>
+
+    <main class="lobby-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Dostunla birlikdə vebdə gəz, ekran paylaş və çatlaş!</h1>
+        <p class="hero-subtitle">
+          Qeydiyyatsız, limitsiz və tamamilə pulsuz. Otaq açın, linki dostunuza göndərin,
+          eyni anda istədiyiniz sayta baxın, HD ekran paylaşın və canlı söhbət edin.
+        </p>
+
+        <div class="lobby-card">
+          <div class="form-group">
+            <label for="usernameInput">Adınız (Ləqəb):</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input type="text" id="usernameInput" placeholder="Məsələn: Orxan" maxlength="20">
+            </div>
+          </div>
+
+          <div class="actions-split">
+            <div class="create-section">
+              <button id="btnCreateRoom" class="btn btn-primary btn-large">
+                <span class="btn-icon">⚡</span>
+                <span>Yeni Otaq Yarat</span>
+              </button>
+            </div>
+
+            <div class="divider">
+              <span>və ya</span>
+            </div>
+
+            <div class="join-section">
+              <div class="input-wrapper">
+                <span class="input-icon">🔑</span>
+                <input type="text" id="roomIdInput" placeholder="Otaq Kodu / Link">
+              </div>
+              <button id="btnJoinRoom" class="btn btn-secondary">Otağa Daxil Ol</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-box">
+            <div class="feature-icon">🌐</div>
+            <h3>Birlikdə Saytlara Baxış</h3>
+            <p>İstədiyiniz saytın linkini və ya domenini daxil edin, eyni vaxtda hər iki tərəfdə açılsın.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🖥️</div>
+            <h3>Canlı Ekran Paylaşımı</h3>
+            <p>Saniyədə 60 kadr WebRTC HD keyfiyyətlə istənilən proqramı və ya pəncərəni paylaşın.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💬</div>
+            <h3>Canlı Söhbət & Səs/Video</h3>
+            <p>Anlıq mesajlaşma, səsli və görüntülü zəng imkanı birbaşa brauzerdə.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🎨</div>
+            <h3>İnteraktiv Lövhə</h3>
+            <p>Birlikdə rəsm çəkin, fikirlərinizi qeyd edin və əylənin.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="lobby-footer">
+      <p>Mirelix &bull; Quraşdırma tələb etmir &bull; P2P Təhlükəsiz</p>
+    </footer>
+  </div>
+
+  <script>
+    // Generate random friendly room ID
+    function generateRoomId() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let id = '';
+      for (let i = 0; i < 6; i++) {
+        id += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return id;
+    }
+
+    // Default username from localStorage or random
+    const savedName = localStorage.getItem('kosmi_username') || ('İstifadəçi-' + Math.floor(1000 + Math.random() * 9000));
+    document.getElementById('usernameInput').value = savedName;
+
+    // Create Room Button
+    document.getElementById('btnCreateRoom').addEventListener('click', () => {
+      const username = document.getElementById('usernameInput').value.trim() || savedName;
+      localStorage.setItem('kosmi_username', username);
+      const newRoom = generateRoomId();
+      window.location.href = `/room/${newRoom}`;
+    });
+
+    // Join Room Button
+    document.getElementById('btnJoinRoom').addEventListener('click', () => {
+      const username = document.getElementById('usernameInput').value.trim() || savedName;
+      localStorage.setItem('kosmi_username', username);
+
+      let roomInput = document.getElementById('roomIdInput').value.trim();
+      if (!roomInput) {
+        alert(I18n.t('Zəhmət olmasa otaq kodunu və ya linkini daxil edin!'));
+        return;
+      }
+
+      // If user pasted full url like http://localhost:3000/room/xyz
+      if (roomInput.includes('/room/')) {
+        const parts = roomInput.split('/room/');
+        roomInput = parts[1].split('?')[0].split('#')[0];
+      }
+
+      window.location.href = `/room/${encodeURIComponent(roomInput)}`;
+    });
+
+    // Enter key support
+    document.getElementById('roomIdInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnJoinRoom').click();
+    });
+  </script>
+</body>
+</html>

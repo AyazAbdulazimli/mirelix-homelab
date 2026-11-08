@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Sinema - Mirelix</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f13;
+      color: #fff;
+      padding: 18px;
+      min-height: 100vh;
+    }
+    .yt-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .yt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .yt-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .yt-logo {
+      background: #ff0000;
+      color: #fff;
+      font-weight: 900;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .yt-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .yt-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-screen-share-rec {
+      background: linear-gradient(135deg, #6c5ce7, #00cec9);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn-screen-share-rec:hover {
+      opacity: 0.9;
+    }
+
+    /* Search & URL Input */
+    .yt-search-box {
+      background: #181922;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .yt-search-form {
+      display: flex;
+      gap: 8px;
+    }
+    .yt-search-input {
+      flex: 1;
+      background: #0d0e14;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 16px;
+      min-width: 0;
+      outline: none;
+    }
+    .yt-search-input:focus {
+      border-color: #ff0000;
+    }
+    .yt-search-btn {
+      background: #ff0000;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    /* Video Player Frame */
+    .player-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .player-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Popular suggestions */
+    .section-title {
+      font-size: 14px;
+      color: #a4b0be;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .preset-card {
+      background: #181922;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .preset-card:hover {
+      background: #232532;
+      border-color: #ff0000;
+      transform: translateY(-2px);
+    }
+    .preset-thumb {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .preset-info strong {
+      display: block;
+      font-size: 13px;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .preset-info span {
+      font-size: 11px;
+      color: #8c93a8;
+    }
+
+    .tip-box {
+      background: rgba(108, 92, 231, 0.1);
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: #c7c1ff;
+      line-height: 1.5;
+    }
+    @media(max-width:480px){body{padding:12px}.yt-title{font-size:14px}.yt-search-box{padding:12px}.yt-search-form{flex-direction:column}.yt-search-btn{min-height:44px}.presets-grid{grid-template-columns:1fr 1fr;gap:8px}.preset-card{padding:10px}.preset-thumb{display:none}.yt-search-input{width:100%}}
+  </style>
+<script src="/js/translations.js"></script>
+<script src="/js/i18n.js"></script>
+</head>
+<body>
+  <div class="yt-container">
+    <header class="yt-header">
+      <div class="yt-brand">
+        <span class="yt-logo">▶ YouTube</span>
+        <span class="yt-title">Sinema & İzləmə Otağı</span>
+      </div>
+      <div class="yt-actions">
+        <button id="btnSwitchToScreen" class="btn-screen-share-rec">
+          <span>🖥️ Canlı Ekran ilə İzlə</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search / URL form -->
+    <div class="yt-search-box">
+      <form id="ytForm" class="yt-search-form">
+        <input type="text" id="ytInput" class="yt-search-input" placeholder="YouTube video linkini yapışdırın…" autocomplete="off">
+        <button type="submit" class="yt-search-btn">Oynat ➔</button>
+      </form>
+    </div>
+
+    <p id="ytFeedback" role="status" style="margin-bottom:12px;color:#c7c1ff;line-height:1.5"></p>
+    <!-- Main Player -->
+    <div class="player-wrapper">
+      <iframe id="mainYtPlayer" src="/player.html?video=jfKfPfyJRdk" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+
+    <!-- Suggested Quick Videos -->
+    <div class="section-title">⚡ Populyar İzləmə Seçimləri:</div>
+    <div class="presets-grid">
+      <div class="preset-card" data-video="jfKfPfyJRdk">
+        <span class="preset-thumb">🎧</span>
+        <div class="preset-info">
+          <strong>Lofi Hip Hop</strong>
+          <span>Canlı rahatladıcı musiqi</span>
+        </div>
+      </div>
+      <div class="preset-card" data-video="4xDzrJKXOOY">
+        <span class="preset-thumb">🎵</span>
+        <div class="preset-info">
+          <strong>Synthwave / Chill</strong>
+          <span>Retro gecə musiqisi</span>
+        </div>
+      </div>
+      <div class="preset-card" data-video="5qap5aO4i9A">
+        <span class="preset-thumb">🍿</span>
+        <div class="preset-info">
+          <strong>Lofi Anime Beats</strong>
+          <span>Anime üslubunda musiqi</span>
+        </div>
+      </div>
+      <div class="preset-card" data-video="LXb3EKWsInQ">
+        <span class="preset-thumb">🌍</span>
+        <div class="preset-info">
+          <strong>4K Təbiət & Planet</strong>
+          <span>Ultra HD mənzərələr</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      💡 <strong>Məsləhət:</strong> YouTube-u öz hesabınızla və ya tam interfeyslə izləmək istəyirsinizsə, yuxarıdakı <strong>"Ekran Paylaşımı"</strong> rejiminə keçin və brauzer tabınızı 60 FPS HD səsli paylaşaraq dostunuzla birlikdə kinoteatr kimi izləyin!
+    </div>
+  </div>
+
+  <script src="/media-bridge.js"></script>
+  <script>
+    const form = document.getElementById('ytForm');
+    const input = document.getElementById('ytInput');
+    const player = document.getElementById('mainYtPlayer');
+    const presetCards = document.querySelectorAll('.preset-card');
+    const btnSwitchScreen = document.getElementById('btnSwitchToScreen');
+
+    function extractVideoId(url) {
+      if (!url) return null;
+      let text = url.trim();
+
+      // If user pasted only 11-char video ID like jfKfPfyJRdk
+      if (/^[a-zA-Z0-9_-]{11}$/.test(text)) {
+        return text;
+      }
+
+      // Check standard watch?v=...
+      const matchV = text.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+      if (matchV) return matchV[1];
+
+      // Check youtu.be/ID
+      const matchShort = text.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if (matchShort) return matchShort[1];
+
+      // Check /embed/ID
+      const matchEmbed = text.match(/embed\/([a-zA-Z0-9_-]{11})/);
+      if (matchEmbed) return matchEmbed[1];
+
+      // Check /shorts/ID
+      const matchShorts = text.match(/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (matchShorts) return matchShorts[1];
+
+      return null;
+    }
+
+    function playVideo(id) {
+      const embedUrl = `/player.html?video=${id}`;
+      player.src = embedUrl;
+
+      // Broadcast to room
+      try {
+        window.parent.postMessage({
+          type: 'KOSMI_FRAME_NAVIGATE',
+          url: `https://www.youtube.com/watch?v=${id}`
+        }, '*');
+      } catch (e) {}
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = input.value.trim();
+      const id = extractVideoId(val);
+
+      if (id) {
+        playVideo(id);
+      } else if (val) {
+        // Search on YouTube embed
+        document.getElementById('ytFeedback').textContent = 'YouTube video linki daxil edin. Videonu YouTube-da tapıb linkini bura yapışdırın.';
+      }
+    });
+
+    presetCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-video');
+        if (id) playVideo(id);
+      });
+    });
+
+    if (btnSwitchScreen) {
+      btnSwitchScreen.addEventListener('click', () => {
+        try {
+          window.parent.postMessage({ type: 'KOSMI_SWITCH_SCREEN' }, '*');
+        } catch (e) {}
+      });
+    }
+  </script>
+</body>
+</html>
