@@ -136,3 +136,11 @@ npm run test:languages -- http://localhost:3030
 ```
 
 Qrup sınağı həqiqi brauzer WebRTC bağlantıları ilə saxta kamera/mikrofon və canvas-dan ekran axını göndərir; əməliyyat sisteminin ekran seçmə pəncərəsini yoxlamır. Standart qrup sınağında xarici STUN-dan asılılığı aradan qaldırmaq üçün yalnız lokal ICE istifadə olunur; mövcud serverin STUN ayarını yoxlamaq üçün `MIRELIX_TEST_STUN=1` əlavə edin. Native media sınağı üçün `ffmpeg`, qarışıq qrup sınağı üçün həm Playwright Chromium, həm Firefox tələb olunur. Provider sınağı canlı Anikoto/MegaPlay mənbəyindən asılıdır; başqa mənbə üçün `MIRELIX_TEST_URL` verilə bilər.
+
+## AI dəstəyi ilə hazırlanma
+
+Mirelix Homelab süni intellekt alətlərinin əhəmiyyətli köməyi ilə hazırlanmış, vibe coding yanaşmasını mənimsəyən açıq mənbəli layihədir.
+
+Layihənin inkişafında AI kodlaşdırma alətlərindən istifadə olunur. Əsas məqsəd öz serverində işləyə bilən, praktik və daim təkmilləşdirilən tətbiq yaratmaqdır.
+
+Layihə icmanın töhfələrinə, kod yoxlamalarına və təkliflərinə açıqdır.
